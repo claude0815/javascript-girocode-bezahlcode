@@ -96,6 +96,8 @@ body {
 	min-height: 14lh;
 	field-sizing: content;
 	resize: vertical;
+	word-wrap: break-word;
+	word-break: break-all;
 }
 
 .note {
@@ -121,6 +123,11 @@ body {
 	#container #codes {
 		padding-left: 1em;
 		display: flex;
+		gap: 1rem;
 		justify-content: space-around;
+	}
+
+	#container #codes > div {
+		width: 50%;
 	}
 }
