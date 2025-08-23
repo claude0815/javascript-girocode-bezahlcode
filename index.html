@@ -14,8 +14,8 @@
 	<div id="container">
 		<form id="info">
 			<p><label for="recipient">Empfänger</label><input type="text" name="recipient" id="recipient" /></p>
-			<p><label for="iban">IBAN</label><input type="text" name="iban" id="iban" /></p>
-			<p><label for="bic">BIC</label><input type="text" name="bic" id="bic" /></p>
+			<p><label for="iban">IBAN</label><input type="text" name="iban" id="iban" required /></p>
+			<p><label for="bic">BIC</label><input type="text" name="bic" id="bic" required /></p>
 			<p>
 				<label for="amount">Betrag</label>
 				<span>
@@ -23,7 +23,7 @@
 						<option value="EUR">EUR</option>
 						<option value="USD">USD</option>
 					</select>
-					<input type="number" name="amount" id="amount" />
+					<input type="text" name="amount" id="amount" required />
 				</span>
 			</p>
 			<p><label for="reason">Verwendungszweck</label><textarea rows="4" name="reason" id="reason"></textarea></p>
@@ -36,11 +36,13 @@
 				<h2>Girocode</h2>
 				<div id="girocode" class="code"></div>
 				<a download="girocode.svg">Download</a>
+				<textarea id="girocode-string"></textarea>
 			</div>
 			<div id="bezahl">
 				<h2>Bezahlcode</h2>
 				<div id="bezahlcode" class="code"></div>
 				<a download="bezahlcode.svg">Download</a>
+				<textarea id="bezahlcode-string"></textarea>
 			</div>
 		</div>
 	</div>

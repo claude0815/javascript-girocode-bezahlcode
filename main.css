@@ -27,6 +27,25 @@ body {
 	flex: 0 0 10em;
 }
 
+#container #info p label[for="iban"]::after {
+	content: "";
+	display: inline-block;
+	background: transparent;
+	width: 0.5em;
+	height: 0.5em;
+	margin-inline-start: 0.5ch;
+	vertical-align: 0.15em;
+	border-radius: 100%;
+}
+
+#container #info p label[for="iban"][data-valid="false"]::after {
+	background: #ff4816;
+}
+
+#container #info p label[for="iban"][data-valid="true"]::after {
+	background: #349cde;
+}
+
 #container #info p input[type="text"],
 #container #info p input[type="number"],
 #container #info p textarea {
@@ -65,6 +84,18 @@ body {
 .code {
 	width: 10em;
 	height: 10em;
+}
+
+:is(#giro, #bezahl) textarea {
+	display: block;
+	font-size: 1rem;
+	width: 100%;
+	margin-block-start: 1rem;
+	border: 0;
+	min-height: 14rem;
+	min-height: 14lh;
+	field-sizing: content;
+	resize: vertical;
 }
 
 .note {

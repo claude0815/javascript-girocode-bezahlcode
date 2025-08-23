@@ -2,7 +2,9 @@
 
 const output = {
 	'girocode': document.querySelector('#girocode'),
-	'bezahlcode': document.querySelector('#bezahlcode')
+	'bezahlcode': document.querySelector('#bezahlcode'),
+	'girocodeString': document.querySelector('#girocode-string'),
+	'bezahlcodeString': document.querySelector('#bezahlcode-string')
 };
 
 const fields = {
@@ -20,14 +22,16 @@ const settings = {
 	'lightColor': '#ffffff'
 };
 
-const replaceSpecialCharacters = function(input) {
-	let value = input.replace(/Ö/g, 'OE');
+const replaceSpecialCharacters = function (input) {
+	let value = input.replace(/Ä/g, 'AE');
+	value = value.replace(/Ö/g, 'OE');
 	value = value.replace(/Ü/g, 'UE');
-	value = value.replace(/Ä/g, 'AE');
+	value = value.replace(/ẞ/g, 'SS');
 	value = value.replace(/ä/g, 'ae');
 	value = value.replace(/ö/g, 'oe');
 	value = value.replace(/ü/g, 'ue');
 	value = value.replace(/ß/g, 'ss');
+
 	return value;
 };
 
@@ -39,14 +43,14 @@ const giroCodeString = function (params) {
 		'version': params.bic.trim() ? '001' : '002',
 		'encoding': '1', // 1 = UTF-8, 2 = ISO 8859-1
 		'transfer': 'SCT',
-		'bic': params.bic.trim(),
-		'name': replaceSpecialCharacters(params.name).trim().substring(0,70), // max of 70 characters
-		'iban': params.iban.replace(' ', '').trim(),
+		'bic': params.bic,
+		'name': params.name.substring(0,70), // max of 70 characters
+		'iban': params.iban,
 		'currency': params.currency.trim().toUpperCase(),
-		'amount': parseFloat(params.amount.trim()),
+		'amount': params.amount,
 		'char': '', // 4 digit key - like SALA, ...
 		'ref': '', // reference - alternative to reason, max of 25 characters
-		'reason': replaceSpecialCharacters(params.reason).trim().replace(sep, ' ').substring(0, 140), // max of 140 characters
+		'reason': params.reason.replace(sep, ' ').substring(0, 140), // max of 140 characters
 		'hint': '' // max of 70 characters
 	};
 
@@ -77,6 +81,7 @@ const makeGiroCode = function () {
 		'reason': fields.reason.value
 	});
 
+	output.girocodeString.innerHTML = str; console.log(str);// str.replaceAll("\n", '<br>');
 	makeQR(output.girocode, str);
 }
 
@@ -112,6 +117,7 @@ const makeBezahlCode = function () {
 		'reason': fields.reason.value
 	});
 
+	output.bezahlcodeString.innerHTML = str;
 	makeQR(output.bezahlcode, str);
 }
 
@@ -155,7 +161,15 @@ const updateFromhash = function() {
 const updateCode = function (e) {
 	e.preventDefault();
 
-	// todo: do some sanity value checking here
+	// todo: do some more (?) sanity value checking here
+
+	fields.recipient.value = replaceSpecialCharacters(fields.recipient.value).trim();
+	fields.bic.value = replaceSpecialCharacters(fields.bic.value).replace(/\s/g, '').trim();
+	fields.iban.value = fields.iban.value.replace(/\s/g, '').trim(); // thanks @WaellerKlaus
+	fields.reason.innerText = replaceSpecialCharacters(fields.reason.innerText).trim().replace("\n", ' ');
+	fields.amount.value = parseFloat(fields.amount.value.replace(',', '.')).toFixed(2); // fields.amount.value.toLocaleString("en-US")
+
+	updateIBAN();
 
 	makeGiroCode();
 	makeBezahlCode();
@@ -163,6 +177,7 @@ const updateCode = function (e) {
 }
 
 document.querySelector('#generate').addEventListener('click', updateCode);
+fields.iban.addEventListener('blur', updateIBAN);
 
 document.querySelectorAll('a[download]').forEach(function (ele, i) {
 	ele.addEventListener('click', function (e) {
@@ -176,6 +191,43 @@ document.querySelectorAll('a[download]').forEach(function (ele, i) {
 
 updateFromhash();
 addEventListener("hashchange", updateFromhash)
+
+// groundwork for IBAN checking, https://stackoverflow.com/a/58973586/3625228
+function validIBAN (value) {
+	let rearrange =
+		value.substring(4, value.length)
+		+ value.substring(0, 4);
+	let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+	let alphaMap = {};
+	let number = [];
+
+	alphabet.forEach((value, index) => {
+		alphaMap[value] = index + 10;
+	});
+
+	rearrange.split('').forEach((value, index) => {
+		number[index] = alphaMap[value] || value;
+	});
+
+	return modulo(number.join('').toString(), 97) === 1;
+}
+
+function modulo (aNumStr, aDiv) {
+	var tmp = "";
+	var i, r;
+	for (i = 0; i < aNumStr.length; i++) {
+		tmp += aNumStr.charAt(i);
+		r = tmp % aDiv;
+		tmp = r.toString();
+	}
+	return tmp / 1;
+}
+
+function updateIBAN () {
+	const IBANvalid = validIBAN(fields.iban.value);
+	console.log('IBAN seems to be', IBANvalid ? 'valid' : 'invalid');
+	document.querySelector('label[for="iban"]').setAttribute('data-valid', IBANvalid);
+}
 
 /*
 // fill in test data
